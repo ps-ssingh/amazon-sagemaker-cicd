@@ -11,7 +11,7 @@ import botocore
 initial_instance_count = 1
 endpoint_instance_type = 'ml.m5.large'
 
-BUCKET_NAME = 'sample-sagemaker-cicd-tuto1'
+BUCKET_NAME = 'sample-sagemaker-saas'
 PREFIX = 'bouston-housing-regression'
 OBJECT_KEY = f'{PREFIX}/reports.csv'
 
@@ -39,7 +39,5 @@ attached_estimator = Estimator.attach(latest_training_job_name)
 attached_predictor = attached_estimator.deploy(initial_instance_count=initial_instance_count,
                                                instance_type=endpoint_instance_type,
                                                endpoint_name=latest_training_job_name,
-                                               tags=[{"Key": "email",
-                                                      "Value": "ali@datachef.co"}],
                                                wait=False)
 print(attached_predictor.endpoint_name)
