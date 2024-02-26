@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: cloudbees-io/checkout@v1
     # see: https://github.com/aws-actions/configure-aws-credentials
     - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: cloudbees-io/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -23,7 +23,7 @@ jobs:
     # see: https://github.com/aws-actions/amazon-ecr-login
     - name: Log in to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: cloudbees-io/configure-ecr-credentials@v1
 
     - name: Build, tag, and push image to Amazon ECR
       env:
@@ -36,7 +36,6 @@ jobs:
         
   submit_training_job:
     needs: [build_image_push_to_ECR]
-    runs-on: [ubuntu-latest]
     container: docker://dvcorg/cml-py3:latest
     steps:
     - uses: actions/checkout@v2
