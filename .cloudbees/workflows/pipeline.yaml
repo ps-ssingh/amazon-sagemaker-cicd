@@ -42,7 +42,6 @@ jobs:
   submit_training_job:
     needs: [build_image_push_to_ECR]
     steps:
-    - uses: actions/checkout@v2
     - name: Fire SageMaker
       id: sm_train
       uses: docker://dvcorg/cml-py3:latest
@@ -51,8 +50,8 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.ss_aws_access_key_id }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.ss_aws_secret_access_key }}
         AWS_DEFAULT_REGION: us-east-1
-        BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-        PREFIX: ${{ secrets.PREFIX }}
+        BUCKET_NAME: sample-sagemaker-saas
+        PREFIX: result
         IAM_ROLE_NAME: ${{ secrets.IAM_ROLE_NAME }}
         GITHUB_SHA: ${{ github.sha }}
       run: |
