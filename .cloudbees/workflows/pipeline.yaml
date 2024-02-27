@@ -10,7 +10,6 @@ env:
 
 jobs:
   build_image_push_to_ECR:
-    runs-on: ubuntu-18.04
     steps:
     - name: Checkout
       uses: cloudbees-io/checkout@v1
@@ -27,7 +26,6 @@ jobs:
       uses: cloudbees-io/configure-ecr-credentials@v1
 
     - name: Build, tag, and push image to Amazon ECR
-      id: build_image_to_ecr
       uses: cloudbees-io/kaniko@v1
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
