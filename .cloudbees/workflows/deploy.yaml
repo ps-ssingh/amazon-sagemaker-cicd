@@ -18,5 +18,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ss_aws_secret_access_key }}
           AWS_DEFAULT_REGION: us-east-1
         run: |
-          pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker
-          requests
+          pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests
