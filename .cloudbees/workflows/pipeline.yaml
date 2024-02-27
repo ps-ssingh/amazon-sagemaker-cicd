@@ -53,7 +53,7 @@ jobs:
         BUCKET_NAME: sample-sagemaker-saas
         PREFIX: result
         IAM_ROLE_NAME: ${{ secrets.IAM_ROLE_NAME }}
-        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_SHA: ${{ cloudbees.scm.sha }}
       run: |
         pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests fsspec s3fs tabulate
       
