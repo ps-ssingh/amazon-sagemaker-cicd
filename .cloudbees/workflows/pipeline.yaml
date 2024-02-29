@@ -57,6 +57,5 @@ jobs:
       run: |
         pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests fsspec s3fs tabulate
         mkdir python
-        cp training-job.py python/
         ls -a
       
