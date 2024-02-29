@@ -42,7 +42,6 @@ jobs:
   submit_training_job:
     needs: [build_image_push_to_ECR]
     runs-on: [ubuntu-latest]
-    container: docker://dvcorg/cml-py3:latest
     steps:
     - name: Fire SageMaker
       id: sm_train
@@ -58,6 +57,5 @@ jobs:
         GITHUB_SHA: ${{ cloudbees.scm.sha }}
       run: |
         pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests fsspec s3fs tabulate
-        mkdir python
-        ls -a
+        python training-job.py
       
