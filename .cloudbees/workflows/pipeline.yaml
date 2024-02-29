@@ -52,7 +52,7 @@ jobs:
         AWS_DEFAULT_REGION: us-east-1
         BUCKET_NAME: sample-sagemaker-saas
         PREFIX: result
-        IAM_ROLE_NAME: ${{ secrets.IAM_ROLE_NAME }}
+        IAM_ROLE_NAME: arn:aws:iam::324005994172:role/awslambda-saas
         GITHUB_SHA: ${{ cloudbees.scm.sha }}
       run: |
         pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests fsspec s3fs tabulate
