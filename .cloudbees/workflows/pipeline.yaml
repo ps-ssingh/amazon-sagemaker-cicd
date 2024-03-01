@@ -5,7 +5,7 @@ name: Pipeline
 on:
   push:
     branches: 
-      - dev
+         - dev
 env:
   APPLICATION_NAME: startupapp
 
@@ -38,13 +38,14 @@ jobs:
           destination: 324005994172.dkr.ecr.us-east-1.amazonaws.com/saas-sagemaker
           build-args: BUILDKIT_CONTEXT_KEEP_GIT_DIR=1,BUILDKIT_INLINE_CACHE=1
           labels: maintainer=Sumeet,version=1.0.0
+
         
   submit_training_job:
     needs: [build_image_push_to_ECR]
     steps:
     - name: Checkout
       uses: cloudbees-io/checkout@v1
-
+      
     - name: Fire SageMaker
       id: sm_train
       uses: docker://dvcorg/cml-py3:latest
@@ -57,9 +58,9 @@ jobs:
         PREFIX: result
         IAM_ROLE_NAME: arn:aws:iam::324005994172:role/awslambda-saas
         GITHUB_SHA: ${{ cloudbees.scm.sha }}
+
       run: |
         pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests fsspec s3fs tabulate
         python training-job.py
         cat details.txt >> report.md
         cml-send-comment report.md 
-      

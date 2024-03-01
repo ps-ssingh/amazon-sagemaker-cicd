@@ -1,0 +1,21 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+name: deploy
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    steps:
+      - name: Checkout Repository
+        uses: cloudbees-io/checkout@v1
+      - name: Fire SageMaker
+        uses: docker://dvcorg/cml-py3:latest
+        id: sm_train
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ss_aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.ss_aws_secret_access_key }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests
