@@ -8,6 +8,8 @@ on:
          - dev
 env:
   APPLICATION_NAME: startupapp
+  IMAGE_NAME: saas-sagemaker
+  IMAGE_VER: latest
 
 jobs:
   build_image_push_to_ECR:
@@ -22,22 +24,21 @@ jobs:
         aws-secret-access-key: ${{ secrets.ss_aws_secret_access_key }}
         aws-region: us-east-1
 
-    - name: Log in to Amazon ECR
-      id: login-ecr
-      uses: cloudbees-io/configure-ecr-credentials@v1
+    - uses: cloudbees-io/configure-oci-credentials@v1
+      name: Setup Docker Hub Registry
+      with:
+        registry: index.docker.io
+        username: ${{ vars.SUM_DOCKER_USERNAME }}
+        password: ${{ secrets.SUM_DOCKER_PASSWORD }}
 
-    - name: Build, tag, and push image to Amazon ECR
+    - name: Build a container image with Kaniko
       uses: cloudbees-io/kaniko@v1
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: saas-sagemaker
-        IMAGE_TAG: latest
       with:
           dockerfile: Dockerfile
           context: .
-          destination: 324005994172.dkr.ecr.us-east-1.amazonaws.com/saas-sagemaker
+          destination: ${{ vars.SUM_DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VER }}
           build-args: BUILDKIT_CONTEXT_KEEP_GIT_DIR=1,BUILDKIT_INLINE_CACHE=1
-          labels: maintainer=Sumeet,version=1.0.1
+          labels: maintainer=Sumeet Singh,version=${{ env.IMAGE_VER }}
 
         
   submit_training_job:
