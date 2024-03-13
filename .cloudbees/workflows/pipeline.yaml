@@ -49,7 +49,7 @@ jobs:
       
     - name: Fire SageMaker
       id: sm_train
-      uses: docker://dvcorg/cml-py3:latest
+      uses: docker://ssingh08/saas-sagemaker:latest
       env:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         AWS_ACCESS_KEY_ID: ${{ secrets.ss_aws_access_key_id }}
