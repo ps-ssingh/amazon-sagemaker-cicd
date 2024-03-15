@@ -7,13 +7,15 @@ COPY serve-script.py /usr/bin/serve
 
 RUN chmod 755 /usr/bin/train /usr/bin/serve
 
-RUN apt-get update && apt-get install -y curl
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
-    && . $HOME/.nvm/nvm.sh \
-    && nvm install 14 \
-    && nvm use 14 \
-    && npm install -g @dvcorg/cml
-
 EXPOSE 8080
 
+# Install Node.js and verify its installation
+RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get install -y nodejs && \
+    node --version && \
+    npm --version && \
+    npx --version
 
+# Install CML globally and verify
+RUN npm install -g @dvcorg/cml && \
+    cml-send-comment --version
