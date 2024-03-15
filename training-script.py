@@ -16,56 +16,36 @@ import botocore
 def update_report_file(metrics_dictionary: dict, hyperparameters: dict,
                        commit_hash: str, training_job_name: str,
                        prefix: str, bucket_name: str,) -> None:
-    """This funtion update the report file located in the S3 bucket according to the provided metrics
-    if report file doesn't exist, it will create a template based on metrics_dictionary schema and upload it to S3
-    Args:
-        metrics_dictionary (dict): the training job metrics with this format: {"Metric_1_Name": "Metric_1_Value", ...}
-        hyperparameters (dict): the training job hyperparameters with this format: {"Hyperparameter_1_Name": "Hyperparameter_1_Value", ...}
-        commit_hash (str): the 7 digit hash of the commit that started this training job
-        training_job_name (str): name of the current training job
-        prefix (str): name of the folder in the S3 bucket
-        bucket_name (str): name of the S3 bucket
-    Returns:
-        None
-    """
     object_key = f'{prefix}/reports.csv'
-
     s3 = boto3.resource('s3')
 
     try:
         s3.Bucket(bucket_name).download_file(object_key, 'reports.csv')
-
         # Load reports df
         reports_df = pd.read_csv('reports.csv')
-
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == '404':
             columns = ['date_time', 'hyperparameters', 'commit_hash',
                        'training_job_name'] + list(metrics_dictionary.keys())
-            pd.DataFrame(columns=columns).to_csv('./reports.csv', index=False)
-
+            pd.DataFrame(columns=columns).to_csv('reports.csv', index=False)
             # Upload template reports df
-            s3.Bucket(bucket_name).upload_file('./reports.csv', object_key)
-
+            s3.Bucket(bucket_name).upload_file('reports.csv', object_key)
             # Load reports df
-            reports_df = pd.read_csv('./reports.csv')
-
+            reports_df = pd.read_csv('reports.csv')
         else:
             raise
 
     # Add new report to reports.csv
     # Use UTC time to avoid timezone heterogeneity
     date_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
-
     # Add new row
-    new_row = dict({'date_time': date_time, 'hyperparameters': json.dumps(hyperparameters), 'commit_hash': commit_hash, 'training_job_name': training_job_name},
-                   **metrics_dictionary)
-    new_report = pd.DataFrame(new_row, index=[0])
-    reports_df = reports_df.append(new_report)
+    new_row = {'date_time': date_time, 'hyperparameters': json.dumps(hyperparameters), 'commit_hash': commit_hash, 'training_job_name': training_job_name, **metrics_dictionary}
+    new_report_df = pd.DataFrame([new_row])  # Wrap the new_row in a list to ensure it's treated as a single row
+    reports_df = pd.concat([reports_df, new_report_df], ignore_index=True)
 
     # Upload new reports dataframe
-    reports_df.to_csv('./reports.csv', index=False)
-    s3.Bucket(bucket_name).upload_file('./reports.csv', object_key)
+    reports_df.to_csv('reports.csv', index=False)
+    s3.Bucket(bucket_name).upload_file('reports.csv', object_key)
 
 
 # Define main training function

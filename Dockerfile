@@ -8,4 +8,13 @@ COPY serve-script.py /usr/bin/serve
 RUN chmod 755 /usr/bin/train /usr/bin/serve
 
 EXPOSE 8080
- 
+
+# Add the NodeSource Node.js v18.x repo and install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# Verify Node.js and npm installations
+RUN node --version && npm --version && npx --version
+
+# Install CML globally
+RUN npm install -g @dvcorg/cml

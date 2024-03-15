@@ -4,10 +4,12 @@ name: Pipeline
 
 on:
   push:
-    branches:
-      - dev
+    branches: 
+         - dev
 env:
   APPLICATION_NAME: startupapp
+  IMAGE_NAME: saas-sagemaker
+  IMAGE_VER: latest
 
 jobs:
   build_image_push_to_ECR:
@@ -18,8 +20,8 @@ jobs:
     - name: Configure AWS Credentials
       uses: cloudbees-io/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-access-key-id: ${{ secrets.ss_aws_access_key_id }}
+        aws-secret-access-key: ${{ secrets.ss_aws_secret_access_key }}
         aws-region: us-east-1
 
     - name: Log in to Amazon ECR
@@ -30,16 +32,22 @@ jobs:
       uses: cloudbees-io/kaniko@v1
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+        ECR_REPOSITORY: saas-sagemaker
         IMAGE_TAG: latest
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      with:
+          dockerfile: Dockerfile
+          context: .
+          destination: 324005994172.dkr.ecr.us-east-1.amazonaws.com/saas-sagemaker
+          build-args: BUILDKIT_CONTEXT_KEEP_GIT_DIR=1,BUILDKIT_INLINE_CACHE=1
+          labels: maintainer=Sumeet,version=1.0.1
+
         
   submit_training_job:
     needs: [build_image_push_to_ECR]
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: cloudbees-io/checkout@v1
+      
     - name: Fire SageMaker
       id: sm_train
       uses: docker://dvcorg/cml-py3:latest
@@ -48,12 +56,12 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.ss_aws_access_key_id }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.ss_aws_secret_access_key }}
         AWS_DEFAULT_REGION: us-east-1
-        BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-        PREFIX: ${{ secrets.PREFIX }}
-        IAM_ROLE_NAME: ${{ secrets.IAM_ROLE_NAME }}
-        GITHUB_SHA: ${{ github.sha }}
+        BUCKET_NAME: sample-sagemaker-saas
+        PREFIX: result
+        IAM_ROLE_NAME: arn:aws:iam::324005994172:role/awslambda-saas
+        GITHUB_SHA: ${{ cloudbees.scm.sha }}
       run: |
         pip install --no-cache-dir --upgrade awscli pandas boto3 sagemaker requests fsspec s3fs tabulate
         python training-job.py
         cat details.txt >> report.md
-        cml-send-comment report.md 
+        cml-send-comment report.md
