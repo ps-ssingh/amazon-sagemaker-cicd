@@ -9,13 +9,12 @@ RUN chmod 755 /usr/bin/train /usr/bin/serve
 
 EXPOSE 8080
 
-# Install Node.js and verify its installation
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
-    apt-get install -y nodejs && \
-    node --version && \
-    npm --version && \
-    npx --version
+# Add the NodeSource Node.js v18.x repo and install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
 
-# Install CML globally and verify
-RUN npm install -g @dvcorg/cml && \
-    cml-send-comment --version
+# Verify Node.js and npm installations
+RUN node --version && npm --version && npx --version
+
+# Install CML globally
+RUN npm install -g @dvcorg/cml
